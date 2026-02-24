@@ -101,46 +101,32 @@ async function fetchData() {
   northDiv.innerHTML = "";
   southDiv.innerHTML = "";
 
-  const predictions = data.data
-    .filter(p => p.attributes.departure_time)
-    .sort((a, b) =>
-      new Date(a.attributes.departure_time) -
-      new Date(b.attributes.departure_time)
-    );
-
   const now = new Date();
 
-  const north = [];
-  const south = [];
+  // Separate predictions by direction
+  const north = data.data
+    .filter(p => p.attributes.departure_time && p.attributes.direction_id === 0)
+    .map(p => new Date(p.attributes.departure_time))
+    .sort((a,b) => a-b)
+    .slice(0, 3); // next 3
 
-  predictions.forEach(p => {
-    const time = new Date(p.attributes.departure_time);
-    const minutes = Math.round((time - now) / 60000);
-    if (minutes < 0) return;
+  const south = data.data
+    .filter(p => p.attributes.departure_time && p.attributes.direction_id === 1)
+    .map(p => new Date(p.attributes.departure_time))
+    .sort((a,b) => a-b)
+    .slice(0, 3); // next 3
 
-    if (p.attributes.direction_id === 0) {
-      if (north.length < 3) north.push(minutes);
-    } else {
-      if (south.length < 3) south.push(minutes);
-    }
-  });
-
-  function render(div, list) {
-    if (list.length === 0) {
+  function render(div, times) {
+    if (times.length === 0) {
       div.innerHTML = "No trains";
       return;
     }
 
-    list.forEach(min => {
+    times.forEach(time => {
+      const minutes = Math.round((time - now) / 60000);
       const el = document.createElement("div");
       el.className = "train";
-
-      if (min <= 0) {
-        el.innerHTML = `<span class="arriving">ARR</span>`;
-      } else {
-        el.innerText = `${min} min`;
-      }
-
+      el.innerHTML = minutes <= 0 ? `<span class="arriving">ARR</span>` : `${minutes} min`;
       div.appendChild(el);
     });
   }
@@ -151,7 +137,6 @@ async function fetchData() {
 
 updateClock();
 fetchData();
-
 setInterval(updateClock, 1000);
 setInterval(fetchData, 30000);
 </script>
