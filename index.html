@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Central Square - Red Line MBTA Board</title>
 
+<!-- Pixel LED font -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
@@ -17,7 +18,12 @@ html, body {
   background: #000;
   color: #fff;
   font-family: 'VT323', monospace;
-  overflow: hidden;
+  overflow-x: hidden; /* hide horizontal scroll */
+}
+
+/* Top spacer to force scroll for Switch UI */
+.top-spacer {
+  height: 20vh; /* adjust this to control scroll amount */
 }
 
 header {
@@ -62,7 +68,7 @@ header {
   display: flex;
   justify-content: space-around;
   padding: 20px;
-  height: 75vh;
+  min-height: 75vh;
 }
 
 .direction {
@@ -81,7 +87,7 @@ header {
 }
 
 .train {
-  font-size: 4rem; /* bigger for train info */
+  font-size: 4.5rem; /* bigger for train info */
   margin: 15px 0;
   display: flex;
   align-items: center;
@@ -89,9 +95,10 @@ header {
 
 .status {
   display: inline-block;
-  width: 140px;
+  width: 180px;       /* wide enough to fit 2+ digit minutes */
   font-weight: bold;
   margin-right: 20px;
+  white-space: nowrap; /* prevents wrapping */
 }
 
 .destination {
@@ -110,6 +117,9 @@ header {
 </style>
 </head>
 <body>
+
+<!-- Spacer to force scroll for Switch UI -->
+<div class="top-spacer"></div>
 
 <header>
   Central Square — Red Line
@@ -140,7 +150,7 @@ function updateClock() {
     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Status logic: ARR if < 0 min, BRD if <=1 min (boarding)
+// Status logic: ARR if <=0 min, BRD if <=1 min (boarding)
 function getStatus(departureTime) {
   const now = new Date();
   const diff = (departureTime - now)/60000;
@@ -184,7 +194,6 @@ async function fetchPredictions() {
       if(list.length===0){div.innerHTML="<div class='train'>No trains</div>"; return;}
       list.forEach(train=>{
         const statusText = getStatus(train.time);
-        // Fix ARR/BRD logic: show ARR first, then BRD only if train is at platform
         let className = '';
         if(statusText==='ARR') className='arriving';
         if(statusText==='BRD') className='boarding';
