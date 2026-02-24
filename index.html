@@ -5,14 +5,14 @@
 <title>Central Square - Red Line MBTA Board</title>
 
 <!-- Pixelated LED-style font -->
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
 body {
   margin: 0;
   background: #000;
   color: #fff;
-  font-family: 'Press Start 2P', monospace;
+  font-family: 'VT323', monospace;
   overflow-x: hidden;
 }
 
@@ -35,7 +35,7 @@ header {
 #alerts {
   background: #111;
   color: #FFD700;
-  font-size: 0.8rem;
+  font-size: 0.9rem;
   padding: 10px 0;
   border-top: 2px solid #444;
   overflow: hidden;
@@ -72,7 +72,7 @@ header {
 }
 
 .train {
-  font-size: 0.9rem;
+  font-size: 1rem;
   margin: 5px 0;
   text-align: left;
   display: flex;
@@ -82,7 +82,7 @@ header {
 
 .status {
   display: inline-block;
-  width: 40px;
+  width: 50px;
   font-weight: bold;
   text-align: left;
   margin-right: 10px;
@@ -92,6 +92,7 @@ header {
   color: #FFD700;
   font-weight: bold;
 }
+
 .arriving, .boarding {
   animation: blink 1s infinite;
 }
@@ -165,9 +166,9 @@ async function fetchPredictions() {
       if(list.length===0){div.innerHTML="<div class='train'>No trains</div>"; return;}
       list.forEach(train=>{
         const statusText = getStatus(train.time);
-        const el=document.createElement("div");
-        el.className="train";
-        el.innerHTML=`<span class="destination">Red → ${train.dest}</span>&nbsp;&nbsp;<span class="status ${statusText==='ARR'?'arriving':statusText==='BRD'?'boarding':''}">${statusText}</span>`;
+        const el = document.createElement("div");
+        el.className = "train";
+        el.innerHTML = `<span class="status ${statusText==='ARR'?'arriving':statusText==='BRD'?'boarding':''}">${statusText}</span> <span class="destination">${train.dest}</span>`;
         div.appendChild(el);
       });
     }
@@ -182,7 +183,7 @@ async function fetchAlerts() {
   try {
     const response = await fetch(`https://api-v3.mbta.com/alerts?filter[route]=${routeId}`);
     const data = await response.json();
-    const alertText=data.data.map(a=>a.attributes.header_text||a.attributes.description_text)
+    const alertText = data.data.map(a=>a.attributes.header_text||a.attributes.description_text)
       .filter(text=>text && text.trim()!=="").join(' | ');
     document.getElementById("alert-text").innerText = alertText || "No current alerts";
   } catch(e){console.error("Error fetching alerts:",e); document.getElementById("alert-text").innerText="No current alerts";}
