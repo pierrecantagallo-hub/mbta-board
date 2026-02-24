@@ -20,12 +20,10 @@ html, body {
   overflow-x: hidden;
 }
 
-/* Tall page trick to force scroll + hide Switch UI */
 .top-spacer {
-  height: 60vh; 
+  height: 60vh;
 }
 
-/* Scaled-down board */
 .board {
   transform: scale(0.6);
   transform-origin: top center;
@@ -153,7 +151,7 @@ const routeId = "Red";
 let lastNorth = [];
 let lastSouth = [];
 
-// Show Boston local time
+// Boston time for clock
 function updateClock() {
   const now = new Date();
   const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' };
@@ -192,7 +190,7 @@ async function fetchPredictions() {
     }
 
     data.data.filter(p => p.attributes.departure_time).forEach(p => {
-      const time = p.attributes.departure_time; // keep UTC
+      const time = p.attributes.departure_time;
       const dest = tripHeadsigns[p.relationships.trip.data.id] || '';
 
       // Column based on headsign
@@ -231,14 +229,26 @@ async function fetchPredictions() {
   }
 }
 
+// Alerts with custom message when none
 async function fetchAlerts() {
   try {
     const response = await fetch(`https://api-v3.mbta.com/alerts?filter[route]=${routeId}`);
     const data = await response.json();
-    const alertText = data.data.map(a=>a.attributes.header_text||a.attributes.description_text)
-      .filter(text=>text && text.trim()!=="").join(' | ');
-    document.getElementById("alert-text").innerText = alertText || "No current alerts";
-  } catch(e){console.error("Error fetching alerts:",e); document.getElementById("alert-text").innerText="No current alerts";}
+
+    let alertText = data.data
+      .map(a=>a.attributes.header_text || a.attributes.description_text)
+      .filter(text=>text && text.trim()!=="")
+      .join(' | ');
+
+    if(!alertText || alertText.trim() === ""){
+      alertText = "No current alerts | Welcome to Aidan and Pie's apartment";
+    }
+
+    document.getElementById("alert-text").innerText = alertText;
+  } catch(e){
+    console.error("Error fetching alerts:", e);
+    document.getElementById("alert-text").innerText = "No current alerts | Welcome to Aidan and Pie's apartment";
+  }
 }
 
 updateClock();
