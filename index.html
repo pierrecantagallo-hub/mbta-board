@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Central Square - Red Line MBTA Board</title>
 
-<!-- LED-style font -->
+<!-- Pixel LED font -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
@@ -16,12 +16,11 @@ body {
   overflow-x: hidden;
 }
 
-/* Header / clock */
 header {
   background: #DA291C;
   padding: 30px;
   text-align: center;
-  font-size: 4rem; /* BIG header */
+  font-size: 4rem;
   font-weight: bold;
   position: relative;
 }
@@ -30,14 +29,13 @@ header {
   position: absolute;
   right: 30px;
   top: 30px;
-  font-size: 2rem; /* bigger clock */
+  font-size: 2rem;
 }
 
-/* Alerts scrolling */
 #alerts {
   background: #111;
   color: #FFD700;
-  font-size: 2rem; /* larger alerts */
+  font-size: 2rem;
   padding: 15px 0;
   border-top: 2px solid #444;
   overflow: hidden;
@@ -55,41 +53,36 @@ header {
   100% { transform: translateX(-100%); }
 }
 
-/* Train container */
 .container {
   display: flex;
   justify-content: space-around;
   padding: 40px;
 }
 
-/* Each direction */
 .direction {
   width: 45%;
 }
 
 .direction h2 {
-  font-size: 3rem; /* bigger direction title */
+  font-size: 3rem;
   border-bottom: 2px solid #444;
   padding-bottom: 10px;
   margin-bottom: 20px;
   text-align: center;
 }
 
-/* Each train line */
 .train {
-  font-size: 2.5rem; /* BIG train text */
+  font-size: 2.5rem;
   margin: 15px 0;
   display: flex;
-  justify-content: flex-start;
   align-items: center;
 }
 
 .status {
   display: inline-block;
-  width: 100px;
+  width: 120px;
   font-weight: bold;
   margin-right: 20px;
-  text-align: left;
 }
 
 .destination {
@@ -99,11 +92,6 @@ header {
 
 .arriving, .boarding {
   animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%,50%,100% { opacity: 1; }
-  25%,75% { opacity: 0; }
 }
 </style>
 </head>
@@ -149,7 +137,7 @@ function getStatus(departureTime) {
 async function fetchPredictions() {
   try {
     const response = await fetch(
-      `https://api-v3.mbta.com/predictions?filter[stop]=${stopId}&filter[route]=${routeId}&sort=departure_time`
+      `https://api-v3.mbta.com/predictions?filter[stop]=${stopId}&filter[route]=${routeId}&sort=departure_time&include=trip`
     );
     const data = await response.json();
     const northDiv = document.getElementById("northbound");
@@ -160,13 +148,24 @@ async function fetchPredictions() {
     const north = [];
     const south = [];
 
+    // Map trip IDs to headsigns (Braintree or Ashmont)
+    const tripHeadsigns = {};
+    if(data.included){
+      data.included.forEach(rel=>{
+        if(rel.type==='trip'){
+          tripHeadsigns[rel.id] = rel.attributes.headsign;
+        }
+      });
+    }
+
     data.data.filter(p => p.attributes.departure_time).forEach(p => {
       const time = new Date(p.attributes.departure_time);
-      if(p.attributes.direction_id===0 && north.length<3) north.push({time,dest:"Alewife"});
-      if(p.attributes.direction_id===1 && south.length<3) south.push({time,dest:"Braintree / Ashmont"});
+      const dest = tripHeadsigns[p.relationships.trip.data.id] || '';
+      if(p.attributes.direction_id===0 && north.length<3) north.push({time,dest});
+      if(p.attributes.direction_id===1 && south.length<3) south.push({time,dest});
     });
 
-    function render(div,list) {
+    function render(div,list){
       if(list.length===0){div.innerHTML="<div class='train'>No trains</div>"; return;}
       list.forEach(train=>{
         const statusText = getStatus(train.time);
