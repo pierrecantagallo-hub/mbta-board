@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MBTA Live Board</title>
+  <style>
+    body {
+      margin: 0;
+      background: black;
+      color: white;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h1 {
+      font-size: 3rem;
+      margin-top: 20px;
+    }
+    .train {
+      font-size: 2.5rem;
+      margin: 20px 0;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Next Departures</h1>
+<div id="board">Loading...</div>
+
+<script>
+const stopId = "place-north"; // CHANGE THIS to your stop later
+
+async function fetchData() {
+  try {
+    const response = await fetch(
+      `https://api-v3.mbta.com/predictions?filter[stop]=${stopId}&sort=departure_time`
+    );
+    const data = await response.json();
+
+    const board = document.getElementById("board");
+    board.innerHTML = "";
+
+    const departures = data.data.slice(0, 5);
+
+    if (departures.length === 0) {
+      board.innerHTML = "No upcoming trains";
+      return;
+    }
+
+    departures.forEach(item => {
+      if (!item.attributes.departure_time) return;
+
+      const time = new Date(item.attributes.departure_time);
+      const now = new Date();
+      const minutes = Math.round((time - now) / 60000);
+
+      const div = document.createElement("div");
+      div.className = "train";
+      div.innerText = `${item.relationships.route.data.id} — ${minutes} min`;
+      board.appendChild(div);
+    });
+
+  } catch (error) {
+    document.getElementById("board").innerText = "Error loading data";
+  }
+}
+
+fetchData();
+setInterval(fetchData, 30000);
+</script>
+
+</body>
+</html>
