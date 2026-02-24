@@ -3,12 +3,16 @@
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Central Square - Red Line MBTA Board</title>
+
+<!-- LED-style font -->
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+
 <style>
 body {
   margin: 0;
   background: #000;
   color: #fff;
-  font-family: 'Courier New', monospace;
+  font-family: 'VT323', monospace;
   overflow-x: hidden;
 }
 
@@ -83,6 +87,16 @@ header {
   color: #FFD700;
   font-weight: bold;
 }
+
+/* Blink effect for ARR/BRD */
+@keyframes blink {
+  0%,50%,100% { opacity: 1; }
+  25%,75% { opacity: 0; }
+}
+
+.arriving, .boarding {
+  animation: blink 1s infinite;
+}
 </style>
 </head>
 <body>
@@ -116,7 +130,7 @@ function updateClock() {
     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Generate train status text: ARR, BRD, or MIN
+// Generate train status text
 function getStatus(departureTime) {
   const now = new Date();
   const diff = (departureTime - now)/60000;
@@ -131,8 +145,6 @@ async function fetchPredictions() {
       `https://api-v3.mbta.com/predictions?filter[stop]=${stopId}&filter[route]=${routeId}&sort=departure_time`
     );
     const data = await response.json();
-    const now = new Date();
-
     const northDiv = document.getElementById("northbound");
     const southDiv = document.getElementById("southbound");
     northDiv.innerHTML = "";
@@ -158,7 +170,7 @@ async function fetchPredictions() {
         const statusText = getStatus(train.time);
         const el = document.createElement("div");
         el.className = "train";
-        el.innerHTML = `<span class="status">${statusText}</span> <span class="destination">Red → ${train.dest}</span>`;
+        el.innerHTML = `<span class="status ${statusText==='ARR'?'arriving':statusText==='BRD'?'boarding':''}">${statusText}</span> <span class="destination">Red → ${train.dest}</span>`;
         div.appendChild(el);
       });
     }
@@ -191,7 +203,6 @@ updateClock();
 fetchPredictions();
 fetchAlerts();
 
-// Intervals
 setInterval(updateClock, 1000);          // clock every second
 setInterval(fetchPredictions, 10000);    // fetch departures every 10 sec
 setInterval(fetchAlerts, 15000);         // fetch alerts every 15 sec
