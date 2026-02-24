@@ -7,7 +7,6 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Central Square - Red Line MBTA Board</title>
 
-<!-- Pixel LED font -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
@@ -18,12 +17,18 @@ html, body {
   background: #000;
   color: #fff;
   font-family: 'VT323', monospace;
-  overflow-x: hidden; /* hide horizontal scroll */
+  overflow-x: hidden;
 }
 
-/* Top spacer to force scroll for Switch UI */
+/* Tall page trick to force scroll + hide Switch UI */
 .top-spacer {
-  height: 20vh; /* adjust this to control scroll amount */
+  height: 60vh; /* big spacer pushes the board down */
+}
+
+/* Scaled-down board */
+.board {
+  transform: scale(0.6); /* shrink to 60% */
+  transform-origin: top center;
 }
 
 header {
@@ -87,7 +92,7 @@ header {
 }
 
 .train {
-  font-size: 4.5rem; /* bigger for train info */
+  font-size: 4.5rem;
   margin: 15px 0;
   display: flex;
   align-items: center;
@@ -95,10 +100,10 @@ header {
 
 .status {
   display: inline-block;
-  width: 180px;       /* wide enough to fit 2+ digit minutes */
+  width: 180px;
   font-weight: bold;
   margin-right: 20px;
-  white-space: nowrap; /* prevents wrapping */
+  white-space: nowrap;
 }
 
 .destination {
@@ -118,25 +123,26 @@ header {
 </head>
 <body>
 
-<!-- Spacer to force scroll for Switch UI -->
 <div class="top-spacer"></div>
 
-<header>
-  Central Square — Red Line
-  <div id="clock"></div>
-</header>
+<div class="board">
+  <header>
+    Central Square — Red Line
+    <div id="clock"></div>
+  </header>
 
-<div id="alerts"><span class="scrolling" id="alert-text">Loading alerts...</span></div>
+  <div id="alerts"><span class="scrolling" id="alert-text">Loading alerts...</span></div>
 
-<div class="container">
-  <div class="direction">
-    <h2>Toward Alewife</h2>
-    <div id="northbound">Loading...</div>
-  </div>
+  <div class="container">
+    <div class="direction">
+      <h2>Toward Alewife</h2>
+      <div id="northbound">Loading...</div>
+    </div>
 
-  <div class="direction">
-    <h2>Toward Braintree / Ashmont</h2>
-    <div id="southbound">Loading...</div>
+    <div class="direction">
+      <h2>Toward Braintree / Ashmont</h2>
+      <div id="southbound">Loading...</div>
+    </div>
   </div>
 </div>
 
@@ -150,7 +156,6 @@ function updateClock() {
     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
-// Status logic: ARR if <=0 min, BRD if <=1 min (boarding)
 function getStatus(departureTime) {
   const now = new Date();
   const diff = (departureTime - now)/60000;
@@ -173,7 +178,6 @@ async function fetchPredictions() {
     const north = [];
     const south = [];
 
-    // Map trip IDs to headsigns (Braintree or Ashmont)
     const tripHeadsigns = {};
     if(data.included){
       data.included.forEach(rel=>{
