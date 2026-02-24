@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Central Square - Red Line MBTA Board</title>
 
-<!-- Pixelated LED-style font -->
+<!-- LED-style font -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
@@ -16,27 +16,29 @@ body {
   overflow-x: hidden;
 }
 
+/* Header / clock */
 header {
   background: #DA291C;
-  padding: 20px;
+  padding: 30px;
   text-align: center;
-  font-size: 2rem;
+  font-size: 4rem; /* BIG header */
   font-weight: bold;
   position: relative;
 }
 
 #clock {
   position: absolute;
-  right: 20px;
-  top: 20px;
-  font-size: 1rem;
+  right: 30px;
+  top: 30px;
+  font-size: 2rem; /* bigger clock */
 }
 
+/* Alerts scrolling */
 #alerts {
   background: #111;
   color: #FFD700;
-  font-size: 0.9rem;
-  padding: 10px 0;
+  font-size: 2rem; /* larger alerts */
+  padding: 15px 0;
   border-top: 2px solid #444;
   overflow: hidden;
   white-space: nowrap;
@@ -45,7 +47,7 @@ header {
 .scrolling {
   display: inline-block;
   padding-left: 100%;
-  animation: scroll 20s linear infinite;
+  animation: scroll 25s linear infinite;
 }
 
 @keyframes scroll {
@@ -53,28 +55,30 @@ header {
   100% { transform: translateX(-100%); }
 }
 
+/* Train container */
 .container {
   display: flex;
   justify-content: space-around;
-  padding: 20px;
+  padding: 40px;
 }
 
+/* Each direction */
 .direction {
   width: 45%;
 }
 
 .direction h2 {
-  font-size: 1.2rem;
+  font-size: 3rem; /* bigger direction title */
   border-bottom: 2px solid #444;
-  padding-bottom: 5px;
-  margin-bottom: 10px;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
   text-align: center;
 }
 
+/* Each train line */
 .train {
-  font-size: 1rem;
-  margin: 5px 0;
-  text-align: left;
+  font-size: 2.5rem; /* BIG train text */
+  margin: 15px 0;
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -82,10 +86,10 @@ header {
 
 .status {
   display: inline-block;
-  width: 50px;
+  width: 100px;
   font-weight: bold;
+  margin-right: 20px;
   text-align: left;
-  margin-right: 10px;
 }
 
 .destination {
