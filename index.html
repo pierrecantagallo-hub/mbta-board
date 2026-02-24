@@ -2,12 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Central Square - Red Line MBTA Board</title>
 
-<!-- Pixel LED font -->
 <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
 
 <style>
@@ -18,10 +17,9 @@ html, body {
   background: #000;
   color: #fff;
   font-family: 'VT323', monospace;
-  overflow: hidden; /* hides scrollbars */
+  overflow: hidden;
 }
 
-/* Header / clock */
 header {
   background: #DA291C;
   padding: 20px;
@@ -39,7 +37,6 @@ header {
   font-size: 2rem;
 }
 
-/* Alerts scrolling */
 #alerts {
   background: #111;
   color: #FFD700;
@@ -61,15 +58,13 @@ header {
   100% { transform: translateX(-100%); }
 }
 
-/* Train container */
 .container {
   display: flex;
   justify-content: space-around;
   padding: 20px;
-  height: 75vh; /* fills rest of screen */
+  height: 75vh;
 }
 
-/* Each direction */
 .direction {
   width: 45%;
   display: flex;
@@ -85,9 +80,8 @@ header {
   text-align: center;
 }
 
-/* Each train line */
 .train {
-  font-size: 3rem; /* bigger train text for Switch */
+  font-size: 4rem; /* bigger for train info */
   margin: 15px 0;
   display: flex;
   align-items: center;
@@ -95,7 +89,7 @@ header {
 
 .status {
   display: inline-block;
-  width: 120px;
+  width: 140px;
   font-weight: bold;
   margin-right: 20px;
 }
@@ -146,6 +140,7 @@ function updateClock() {
     now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 }
 
+// Status logic: ARR if < 0 min, BRD if <=1 min (boarding)
 function getStatus(departureTime) {
   const now = new Date();
   const diff = (departureTime - now)/60000;
@@ -189,9 +184,13 @@ async function fetchPredictions() {
       if(list.length===0){div.innerHTML="<div class='train'>No trains</div>"; return;}
       list.forEach(train=>{
         const statusText = getStatus(train.time);
+        // Fix ARR/BRD logic: show ARR first, then BRD only if train is at platform
+        let className = '';
+        if(statusText==='ARR') className='arriving';
+        if(statusText==='BRD') className='boarding';
         const el = document.createElement("div");
         el.className = "train";
-        el.innerHTML = `<span class="status ${statusText==='ARR'?'arriving':statusText==='BRD'?'boarding':''}">${statusText}</span> <span class="destination">${train.dest}</span>`;
+        el.innerHTML = `<span class="status ${className}">${statusText}</span> <span class="destination">${train.dest}</span>`;
         div.appendChild(el);
       });
     }
