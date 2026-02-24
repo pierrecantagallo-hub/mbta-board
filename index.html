@@ -22,12 +22,12 @@ html, body {
 
 /* Tall page trick to force scroll + hide Switch UI */
 .top-spacer {
-  height: 60vh; /* big spacer pushes the board down */
+  height: 60vh; 
 }
 
 /* Scaled-down board */
 .board {
-  transform: scale(0.6); /* shrink to 60% */
+  transform: scale(0.6);
   transform-origin: top center;
 }
 
@@ -150,15 +150,21 @@ header {
 const stopId = "place-cntsq";
 const routeId = "Red";
 
+let lastNorth = [];
+let lastSouth = [];
+
+// Show Boston local time
 function updateClock() {
   const now = new Date();
-  document.getElementById("clock").innerText =
-    now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit' };
+  document.getElementById("clock").innerText = now.toLocaleTimeString([], options);
 }
 
-function getStatus(departureTime) {
+// Status logic: ARR if <=0 min, BRD if <=1 min (boarding)
+function getStatus(departureTimeUtc) {
+  const departure = new Date(departureTimeUtc);
   const now = new Date();
-  const diff = (departureTime - now)/60000;
+  const diff = (departure - now)/60000; // minutes
   if(diff <= 0) return 'ARR';
   if(diff <= 1) return 'BRD';
   return Math.round(diff) + ' MIN';
@@ -172,8 +178,6 @@ async function fetchPredictions() {
     const data = await response.json();
     const northDiv = document.getElementById("northbound");
     const southDiv = document.getElementById("southbound");
-    northDiv.innerHTML = "";
-    southDiv.innerHTML = "";
 
     const north = [];
     const south = [];
@@ -188,13 +192,19 @@ async function fetchPredictions() {
     }
 
     data.data.filter(p => p.attributes.departure_time).forEach(p => {
-      const time = new Date(p.attributes.departure_time);
+      const time = p.attributes.departure_time; // keep UTC
       const dest = tripHeadsigns[p.relationships.trip.data.id] || '';
-      if(p.attributes.direction_id===0 && north.length<3) north.push({time,dest});
-      if(p.attributes.direction_id===1 && south.length<3) south.push({time,dest});
+
+      // Column based on headsign
+      if(dest.includes("Alewife") && north.length<3) north.push({time,dest});
+      else if((dest.includes("Braintree") || dest.includes("Ashmont")) && south.length<3) south.push({time,dest});
     });
 
+    if(north.length === 0 && lastNorth.length) north.push(...lastNorth);
+    if(south.length === 0 && lastSouth.length) south.push(...lastSouth);
+
     function render(div,list){
+      div.innerHTML = "";
       if(list.length===0){div.innerHTML="<div class='train'>No trains</div>"; return;}
       list.forEach(train=>{
         const statusText = getStatus(train.time);
@@ -211,7 +221,14 @@ async function fetchPredictions() {
     render(northDiv,north);
     render(southDiv,south);
 
-  } catch(e){console.error("Error fetching predictions:",e);}
+    lastNorth = north;
+    lastSouth = south;
+
+  } catch(e){
+    console.error("Error fetching predictions:", e);
+    if(lastNorth.length) render(document.getElementById("northbound"), lastNorth);
+    if(lastSouth.length) render(document.getElementById("southbound"), lastSouth);
+  }
 }
 
 async function fetchAlerts() {
