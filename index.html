@@ -486,15 +486,18 @@
       );
     }
 
-    function TrainRows({ trains }) {
+    function TrainRows({ trains, status }) {
       const rows = [...trains];
       while (rows.length < 3) rows.push(null);
+      const noTrains = trains.length === 0 && status === "ok";
       return rows.map((t, i) => t
         ? <TrainRow key={i} mins={t.mins} dest={t.dest} />
         : <div key={i} className="train-entry">
             <div className="led-num" style={{color:'#2a1800'}}>--</div>
             <div className="led-min-label" style={{color:'#1a0e00'}}>min</div>
-            <div className="led-dest" style={{color:'#2a1800'}}>-------</div>
+            <div className="led-dest" style={{color: noTrains && i === 0 ? '#553300' : '#2a1800', fontSize: noTrains && i === 0 ? '0.65rem' : undefined, letterSpacing: noTrains && i === 0 ? 2 : undefined}}>
+              {noTrains && i === 0 ? 'NO PREDICTIONS' : '-------'}
+            </div>
           </div>
       );
     }
@@ -622,7 +625,7 @@
                   {status === "loading" && <>
                     {[0,1,2].map(i => <div key={i} className="train-entry"><div className="led-num" style={{color:'#2a1800', animation:'blink 1s infinite'}}>--</div><div className="led-min-label" style={{color:'#1a0e00'}}>min</div><div className="led-dest" style={{color:'#2a1800'}}>-------</div></div>)}
                   </>}
-                  {status !== "loading" && <TrainRows trains={alewife} />}
+                  {status !== "loading" && <TrainRows trains={alewife} status={status} />}
                 </div>
 
                 {/* South column */}
@@ -630,7 +633,7 @@
                   {status === "loading" && <>
                     {[0,1,2].map(i => <div key={i} className="train-entry"><div className="led-num" style={{color:'#2a1800', animation:'blink 1s infinite'}}>--</div><div className="led-min-label" style={{color:'#1a0e00'}}>min</div><div className="led-dest" style={{color:'#2a1800'}}>-------</div></div>)}
                   </>}
-                  {status !== "loading" && <TrainRows trains={south} />}
+                  {status !== "loading" && <TrainRows trains={south} status={status} />}
                 </div>
               </div>
 
