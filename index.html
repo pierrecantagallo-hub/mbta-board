@@ -56,26 +56,26 @@
     .clock-wrap {
       width: 100%;
       max-width: 720px;
-      padding: 20px;
+      padding: 0;
     }
 
     /* Outer housing */
     .housing {
       background: #0f0f0f;
-      border: 3px solid #2a2a2a;
-      border-radius: 6px;
+      
+      
       overflow: hidden;
       box-shadow:
         0 0 0 1px #111,
         0 8px 32px rgba(0,0,0,0.9),
         inset 0 1px 0 rgba(255,255,255,0.04);
-      animation: ledFlicker 8s ease-in-out infinite;
+      animation: none;
     }
 
     /* Red header bar */
     .header-bar {
       background: #CC0000;
-      padding: 7px 16px;
+      padding: 8px 16px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -105,10 +105,12 @@
 
     .header-title {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.75rem;
+      font-size: 1.8rem;
       color: #fff;
-      letter-spacing: 3px;
+      letter-spacing: 6px;
       text-transform: uppercase;
+      text-align: center;
+      flex: 1;
     }
 
     .header-clock {
@@ -143,7 +145,7 @@
     }
 
     .station-name-led {
-      font-size: 0.85rem;
+      font-size: 1.4rem;
       color: #ff8c00;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -152,22 +154,23 @@
 
     /* Direction header */
     .direction-header {
-      background: #111;
-      border-bottom: 1px solid #1c1c1c;
-      padding: 5px 16px;
+      background: #181818;
+      border-bottom: 2px solid #CC0000;
+      padding: 10px 16px;
       display: grid;
       grid-template-columns: 1fr 1fr;
     }
 
     .dir-label {
-      font-size: 0.55rem;
-      color: #555;
-      letter-spacing: 3px;
+      font-size: 0.7rem;
+      color: #cc6600;
+      letter-spacing: 2px;
       text-transform: uppercase;
+      text-shadow: 0 0 6px rgba(200,100,0,0.3);
     }
 
     .dir-label:last-child {
-      border-left: 1px solid #1c1c1c;
+      border-left: 1px solid #2a2a2a;
       padding-left: 16px;
     }
 
@@ -179,7 +182,7 @@
     }
 
     .trains-col {
-      padding: 10px 16px 14px;
+      padding: 16px 16px 16px;
     }
 
     .trains-col:first-child {
@@ -191,8 +194,8 @@
       display: flex;
       align-items: center;
       gap: 0;
-      margin-bottom: 8px;
-      height: 36px;
+      margin-bottom: 10px;
+      height: 52px;
     }
 
     .train-entry:last-child {
@@ -202,7 +205,7 @@
     /* LED minutes number */
     .led-num {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 1.9rem;
+      font-size: 2.6rem;
       line-height: 1;
       min-width: 52px;
       text-align: right;
@@ -217,7 +220,7 @@
     }
 
     .led-num.arr {
-      font-size: 1.9rem;
+      font-size: 2.6rem;
       color: #ffcc00;
       text-shadow:
         0 0 4px rgba(255,200,0,0.9),
@@ -240,7 +243,7 @@
 
     .led-dest {
       font-family: 'Share Tech Mono', monospace;
-      font-size: 0.75rem;
+      font-size: 1.4rem;
       color: #ff8c00;
       letter-spacing: 1px;
       text-transform: uppercase;
@@ -303,8 +306,8 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       line-height: 24px;
-      animation: scrollText 40s linear infinite;
-      -webkit-animation: scrollText 40s linear infinite;
+      animation: scrollText 90s linear infinite;
+      -webkit-animation: scrollText 90s linear infinite;
     }
 
     /* Status footer */
@@ -434,6 +437,12 @@
       background: radial-gradient(ellipse at 50% 40%, rgba(255,100,0,0.03) 0%, transparent 70%);
       pointer-events: none;
     }
+    .custom-select { position: relative; display: inline-block; }
+    .custom-select-btn { background:#080808; border:1px solid #2a2a2a; color:#ff8c00; font-family:'Share Tech Mono',monospace; font-size:0.65rem; padding:4px 24px 4px 8px; border-radius:2px; cursor:pointer; letter-spacing:1px; text-transform:uppercase; min-width:120px; text-align:left; position:relative; text-shadow:0 0 6px rgba(255,140,0,0.3); }
+    .custom-select-btn::after { content:'▼'; position:absolute; right:7px; top:50%; transform:translateY(-50%); font-size:0.4rem; color:#884400; }
+    .custom-select-dropdown { position:absolute; bottom:100%; left:0; background:#080808; border:1px solid #2a2a2a; border-radius:2px; min-width:120px; z-index:999; margin-bottom:4px; max-height:200px; overflow-y:auto; }
+    .custom-select-option { padding:5px 10px; font-family:'Share Tech Mono',monospace; font-size:0.65rem; color:#884400; letter-spacing:1px; text-transform:uppercase; cursor:pointer; border-bottom:1px solid #111; }
+    .custom-select-option:hover, .custom-select-option.active { background:#111; color:#ff8c00; text-shadow:0 0 6px rgba(255,140,0,0.4); }
   </style>
 </head>
 <body>
@@ -465,6 +474,28 @@
       if (!isoTime) return null;
       const diff = (new Date(isoTime) - new Date()) / 1000 / 60;
       return Math.max(0, Math.round(diff));
+    }
+
+    function CustomSelect({ value, onChange, options }) {
+      const [open, setOpen] = React.useState(false);
+      const current = options.find(o => o.id === value);
+      return (
+        <div className="custom-select">
+          <button className="custom-select-btn" onClick={() => setOpen(o => !o)}>
+            {current?.name || value}
+          </button>
+          {open && (
+            <div className="custom-select-dropdown">
+              {options.map(o => (
+                <div key={o.id} className={`custom-select-option${o.id === value ? ' active' : ''}`}
+                  onClick={() => { onChange(o.id); setOpen(false); }}>
+                  {o.name}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
     }
 
     function LedNum({ mins }) {
@@ -599,7 +630,7 @@
             <div className="header-bar">
               <div className="header-logo">
                 <div className="mbta-bug">T</div>
-                <div className="header-title">Massachusetts Bay Transportation Authority</div>
+                <div className="header-title">MBTA  ·  RED LINE</div>
               </div>
               <div className="header-clock">{clock}</div>
             </div>
@@ -639,20 +670,14 @@
 
               {/* Ticker */}
               <div className="ticker-bar">
-                <div className="ticker-text" style={{WebkitAnimation:"scrollText 40s linear infinite"}}>{ticker}{ticker}{ticker}</div>
+                <div className="ticker-text" style={{WebkitAnimation:"scrollText 90s linear infinite"}}>{ticker}{ticker}{ticker}</div>
               </div>
             </div>
 
             {/* Controls */}
             <div className="controls-bar">
               <div className="ctrl-label">Station</div>
-              <select
-                className="led-select"
-                value={stationId}
-                onChange={e => setStationId(e.target.value)}
-              >
-                {STATIONS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
-              </select>
+              <CustomSelect value={stationId} onChange={id => setStationId(id)} options={STATIONS} />
               <button className="led-btn" onClick={fetchPredictions}>↺ Refresh</button>
             </div>
 
@@ -671,6 +696,16 @@
     }
 
     ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+
+    function autoZoom() {
+      const wrap = document.querySelector(".clock-wrap");
+      if (!wrap) return;
+      const scaleX = window.innerWidth / wrap.offsetWidth;
+      const scaleY = window.innerHeight / wrap.offsetHeight;
+      wrap.style.zoom = Math.min(scaleX, scaleY);
+    }
+    setTimeout(autoZoom, 500);
+    window.addEventListener("resize", autoZoom);
   </script>
 </body>
 </html>
