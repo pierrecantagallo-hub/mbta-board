@@ -217,13 +217,13 @@
     }
 
     .led-num.arr {
-      font-size: 1.1rem;
+      font-size: 1.9rem;
       color: #ffcc00;
       text-shadow:
         0 0 4px rgba(255,200,0,0.9),
         0 0 12px rgba(255,180,0,0.5);
       animation: arrBlink 0.8s ease-in-out infinite;
-      letter-spacing: 0;
+      letter-spacing: -1px;
       min-width: 52px;
     }
 
@@ -303,8 +303,8 @@
       letter-spacing: 2px;
       text-transform: uppercase;
       line-height: 24px;
-      animation: scrollText 60s linear infinite;
-      -webkit-animation: scrollText 60s linear infinite;
+      animation: scrollText 40s linear infinite;
+      -webkit-animation: scrollText 40s linear infinite;
     }
 
     /* Status footer */
@@ -639,7 +639,7 @@
 
               {/* Ticker */}
               <div className="ticker-bar">
-                <div className="ticker-text" style={{WebkitAnimation:"scrollText 60s linear infinite"}}>{ticker}{ticker}{ticker}</div>
+                <div className="ticker-text" style={{WebkitAnimation:"scrollText 40s linear infinite"}}>{ticker}{ticker}{ticker}</div>
               </div>
             </div>
 
